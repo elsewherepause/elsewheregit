@@ -1,0 +1,182 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String?   @db.Text
+
+  template    ProjectTemplate @default(CUSTOM)
+  templateData Json?
+  category    ProjectCategory?
+
+  heroImageId String?
+  heroImage   MediaAsset? @relation("ProjectHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+  ogImage        MediaAsset? @relation("ProjectOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blocks      ContentBlock[]
+
+  @@index([slug])
+  @@index([published, publishedAt])
+}
+
+enum ProjectTemplate {
+  CUSTOM
+  TEMPLATE_1
+  TEMPLATE_2
+  TEMPLATE_3
+  TEMPLATE_4
+}
+
+enum ProjectCategory {
+  CULTURE
+  ADVENTURE
+}
+
+// ─── Content Blocks ───────────────────────────────────────────────────────────
+
+model ContentBlock {
+  id        String    @id @default(cuid())
+  projectId String
+  type      BlockType
+  order     Int
+  payload   Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, order])
+}
+
+enum BlockType {
+  INTRO
+  RICH_TEXT
+  FULL_WIDTH_IMAGE
+  IMAGE_TEXT
+  PORTRAIT_IMAGE
+  LANDSCAPE_IMAGE
+  GALLERY
+  QUOTE
+  DIVIDER
+  SPACER
+}
+
+// ─── Media ────────────────────────────────────────────────────────────────────
+
+model MediaAsset {
+  id            String  @id @default(cuid())
+  cloudinaryId  String  @unique
+  cloudinaryUrl String
+  format        String
+  width         Int
+  height        Int
+  bytes         Int
+  altText       String?
+  caption       String?
+
+  createdAt DateTime @default(now())
+
+  heroProjects  Project[]            @relation("ProjectHero")
+  ogProjects    Project[]            @relation("ProjectOg")
+  galleryImages GalleryImage[]       @relation("GalleryImageAsset")
+  noteHeaders   Note[]               @relation("NoteHeader")
+  noteFooters   Note[]               @relation("NoteFooter")
+
+  @@index([createdAt])
+}
+
+// ─── Gallery ──────────────────────────────────────────────────────────────────
+
+enum GalleryMediaType {
+  PHOTO
+  VIDEO
+}
+
+model GalleryImage {
+  id String @id @default(cuid())
+
+  // Existing Cloudinary image (optional for YouTube videos)
+  imageId String?
+  image MediaAsset? @relation("GalleryImageAsset", fields: [imageId], references: [id], onDelete: Cascade)
+
+  // Media type
+  mediaType GalleryMediaType @default(PHOTO)
+
+  // YouTube support
+  youtubeUrl String?
+  youtubeVideoId String?
+
+  // Existing fields
+  altText String?
+  caption String?
+  description String? @db.Text
+  category String?
+  imageAdjust Json?
+
+  order Int @default(0)
+  published Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([category])
+  @@index([published])
+  @@index([youtubeVideoId])
+}
+
+// ─── Notes ────────────────────────────────────────────────────────────────────
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  readTime  String   @default("2 min read")
+  published Boolean  @default(true)
+
+  headerImageId String?
+  headerImage   MediaAsset? @relation("NoteHeader", fields: [headerImageId], references: [id], onDelete: SetNull)
+
+  footerImageId String?
+  footerImage   MediaAsset? @relation("NoteFooter", fields: [footerImageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+}
+

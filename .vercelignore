@@ -1,0 +1,3 @@
+# Don't ignore Prisma generated files
+!src/generated/prisma
+!src/generated/prisma/**
