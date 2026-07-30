@@ -137,12 +137,14 @@ function GalleryGroup({
   note2,
   gIndex,
   onOpen,
+  showImages,
 }: {
   groupItems: GalleryItemData[]
   note1?: Note
   note2?: Note
   gIndex: number
   onOpen: (item: GalleryItemData) => void
+  showImages: boolean
 }) {
   const flip = gIndex % 2 === 1
   const img0 = groupItems[0]
@@ -154,31 +156,55 @@ function GalleryGroup({
   const img6 = groupItems[6]
   const img7 = groupItems[7]
 
+  if (!showImages) {
+  return (
+    <div className="space-y-24">
+      {note1 && (
+        <ArticleNote
+          note={note1}
+          align={flip ? "right" : "left"}
+        />
+      )}
+
+      {note2 && (
+        <ArticleNote
+          note={note2}
+          align="right"
+        />
+      )}
+    </div>
+  )
+}
+
   return (
     <div className="space-y-20 md:space-y-24 lg:space-y-36">
       {/* Row 1: Article note + center portrait + text right */}
       {img0 && (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           <div className="col-span-12 md:col-span-3 md:col-start-1 md:pt-4">
-            <ArticleNote note={note1} align={flip ? 'right' : 'left'} />
+            {!showImages ? (
+  <ArticleNote note={note1} align={flip ? 'right' : 'left'} />
+) : null}
           </div>
-          <div
+          { (
+  <div
     className={getCols(
-    img0,
-    'col-span-12 md:col-span-3 md:col-start-5',
-    'col-span-12 md:col-span-6 md:col-start-4'
-  )}
->
-  {renderImage(
-  img0,
-  getAspect(
-    img0,
-    'aspect-[274/376]',
-    'aspect-[520/298]'
-  ),
-  onOpen
+      img0,
+      'col-span-12 md:col-span-3 md:col-start-5',
+      'col-span-12 md:col-span-6 md:col-start-4'
+    )}
+  >
+    {renderImage(
+      img0,
+      getAspect(
+        img0,
+        'aspect-[274/376]',
+        'aspect-[520/298]'
+      ),
+      onOpen
+    )}
+  </div>
 )}
-</div>
           <div className={`col-span-12 md:col-span-4 md:col-start-9 md:pt-10 ${flip ? 'md:col-start-1 md:row-start-1' : ''}`}>
             <EditorialText
               title={img0.caption}
@@ -193,18 +219,18 @@ function GalleryGroup({
       {(img1 || img2) && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
           {img1 && (
-            <div>
-              {renderImage(
-  img1,
-  getAspect(
-    img1,
-    'aspect-[288/395]',
-    'aspect-[520/298]'
-  ),
-  onOpen
+  <div>
+    {renderImage(
+      img1,
+      getAspect(
+        img1,
+        'aspect-[288/395]',
+        'aspect-[520/298]'
+      ),
+      onOpen
+    )}
+  </div>
 )}
-            </div>
-          )}
           {img1 && (
             <div className="md:self-end">
               <EditorialText title={img1.caption} desc={img1.description} align="left" />
@@ -216,10 +242,10 @@ function GalleryGroup({
             )}
           </div>
           {img2 && (
-            <div className="order-1 md:order-none">
-              {renderImage(img2, 'aspect-[288/395]', onOpen)}
-            </div>
-          )}
+  <div className="order-1 md:order-none">
+    {renderImage(img2, 'aspect-[288/395]', onOpen)}
+  </div>
+)}
         </div>
       )}
 
@@ -229,9 +255,11 @@ function GalleryGroup({
           <div className="col-span-12 md:col-span-3 md:col-start-4 order-2 md:order-none">
             <EditorialText title={img3.caption} desc={img3.description} align="right" />
           </div>
-          <div className="col-span-12 md:col-span-6 md:col-start-7 order-1 md:order-none">
-            {renderImage(img3, 'aspect-[520/298]', onOpen)}
-          </div>
+          {(
+  <div className="col-span-12 md:col-span-6 md:col-start-7 order-1 md:order-none">
+    {renderImage(img3, 'aspect-[520/298]', onOpen)}
+  </div>
+)}
         </div>
       )}
 
@@ -254,7 +282,9 @@ function GalleryGroup({
           </div>
           {img5 && (
             <div className="col-span-12 md:col-span-3 md:col-start-10">
-              <ArticleNote note={note2} align="right" />
+              {!showImages ? (
+  <ArticleNote note={note2} align="right" />
+) : null}
               <div className="mt-4">
                 {renderImage(img5, 'aspect-[288/395]', onOpen)}
               </div>
@@ -317,7 +347,15 @@ function GalleryGroup({
   )
 }
 
-export default function GalleryGrid({ items, notes = [] }: { items: GalleryItemData[]; notes?: Note[] }) {
+export default function GalleryGrid({
+  items,
+  notes = [],
+  showImages = true,
+}: {
+  items: GalleryItemData[]
+  notes?: Note[]
+  showImages?: boolean
+}) {
   const [lightboxItem, setLightboxItem] = useState<GalleryItemData | null>(null)
 
   if (items.length === 0) {
@@ -341,14 +379,15 @@ export default function GalleryGrid({ items, notes = [] }: { items: GalleryItemD
           const note1 = notes[gIndex * 2]
           const note2 = notes[gIndex * 2 + 1]
           return (
-            <GalleryGroup
-              key={gIndex}
-              groupItems={groupItems}
-              note1={note1}
-              note2={note2}
-              gIndex={gIndex}
-              onOpen={setLightboxItem}
-            />
+<GalleryGroup
+  key={gIndex}
+  groupItems={groupItems}
+  note1={note1}
+  note2={note2}
+  gIndex={gIndex}
+  onOpen={setLightboxItem}
+  showImages={showImages}
+/>
           )
         })}
       </div>

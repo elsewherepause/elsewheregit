@@ -443,8 +443,8 @@ export default function Template3Layout({
                       <H2 l={910} t={4840 + off} w={460}>{s.headline}</H2>
                       <P l={913} t={4980 + off} w={460}>{s.quote}</P>
                       <P l={254} t={5190 + off} w={220}>{s.body2}</P>
-                      <P l={504} t={2 + off} w={220}>{s.body3}</P>
-                      <P l={754} t={5170 + off} w={220}>{s.body4}</P>
+                      <P l={504} t={5190 + off} w={220}>{s.body3}</P>
+                      <P l={754} t={5190 + off} w={220}>{s.body4}</P>
                     </React.Fragment>
                   )
                 case 6: return (

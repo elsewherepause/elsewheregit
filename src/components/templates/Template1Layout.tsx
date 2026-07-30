@@ -328,7 +328,7 @@ export default function Template1Layout({ data, isEditing, onImageSelect }: Prop
           <ImgBox id={s.image1} sk={sk} field="image1" l={732} t={4548 + off} w={694} h={589} adj={s.image1Adjust} />
           <HeadingRow headline={s.headline} hl={254} ht={4775 + off} hw={421} bodies={[{ text: s.body1, l: 254 }, { text: s.body2, l: 493 }]} />
           <ImgBox id={s.image2} sk={sk} field="image2" l={253} t={5193 + off} w={469} h={334} adj={s.image2Adjust} />
-          <P l={750} t={5350 + off} w={220}>{s.body3}</P>
+          <P l={750} t={5290 + off} w={220}>{s.body3}</P>
         </React.Fragment>
       )
       case 6: return (

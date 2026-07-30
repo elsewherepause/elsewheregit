@@ -315,12 +315,12 @@ export default function Template4Layout({
       case 0: return (
         <React.Fragment key={i}>
           <ImgBox id={s.image1} si={sk} field="image1" l={254} t={1012 + off} w={691} h={554} adj={s.image1Adjust} />
-          <SecNum n={num} l={1410} t={1209 + off} />
+          <SecNum n={num} l={1410} t={1109 + off} />
           <div
   style={{
     position: 'absolute',
     left: 964,
-    top: 1239 + off,
+    top: 1139 + off,
     width: 399,
     fontFamily: 'var(--font-serif, DM Sans)',
     fontWeight: 500,
@@ -336,7 +336,7 @@ export default function Template4Layout({
 
 <P
   l={964}
-  t={1355 + off}   // Move this up/down
+  t={1285 + off}   // Move this up/down
   w={220}
 >
   {s.body1}
@@ -344,7 +344,7 @@ export default function Template4Layout({
 
 <P
   l={1212}
-  t={1355 + off}   // Move independently
+  t={1285 + off}   // Move independently
   w={220}
 >
   {s.body2}

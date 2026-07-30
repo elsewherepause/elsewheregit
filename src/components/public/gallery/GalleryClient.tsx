@@ -45,31 +45,8 @@ export default function GalleryClient({
         {/* Filter bar */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-16">
           <div className="flex flex-wrap items-center gap-6 md:gap-12">
-            <span className="text-sm font-semibold uppercase tracking-widest"></span>
-            {categories.length > 0 && (
-              <div className="flex flex-wrap items-center gap-6">
-                {categories.map((category) => {
-                  const active = activeCategory === category
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setActiveCategory(active ? null : category)}
-                      className="flex items-center gap-1.5 text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
-                      aria-pressed={active}
-                    >
-                      <span
-                        className={`inline-block size-[8px] border border-[var(--color-ink)] ${
-                          active ? 'bg-[var(--color-ink)]' : ''
-                        }`}
-                        aria-hidden="true"
-                      />
-                      {category}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+            
+            
           </div>
 
           <div className="flex items-center gap-6 text-sm uppercase tracking-widest">
@@ -89,7 +66,11 @@ export default function GalleryClient({
           </div>
         </div>
 
-        <GalleryGrid items={filtered} notes={notes} />
+        <GalleryGrid
+  items={filtered}
+  notes={notes}
+  showImages={activeType !== 'all'}
+/>
       </div>
 
       <SiteFooter nextProject={nextProject} destinations={destinations} />
