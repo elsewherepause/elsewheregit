@@ -248,13 +248,10 @@ export default function AboutCanvas() {
           </div>
         </div>
 
-        {/* ── Photo + Contact form ── */}
-        <div style={{ position: 'absolute', left: 80, top: 5444, display: 'flex', gap: 118, alignItems: 'flex-start' }}>
-          <div style={{ height: 565, width: 469, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-            <img alt="" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/neeruganti-landscape.png" />
-          </div>
-          <ContactForm />
-        </div>
+        {/* ── Contact form ── */}
+<div style={{ position: 'absolute', left: 80, top: 5444 }}>
+  <ContactForm />
+</div>
 
         {/* ── .elsewhere footer wordmark ── */}
         <div style={{ position: 'absolute', left: 0, top: 6144, width: W }}>
