@@ -85,7 +85,7 @@ export default function WelcomeIntro() {
                 transition: 'color 0.2s',
               }}
             >
-              Take me elsewhere
+              Continue
             </span>
           </motion.div>
         )}

@@ -8,8 +8,8 @@ import type { Note } from '@/actions/note.actions'
 type MediaFilter = 'all' | 'PHOTO' | 'VIDEO'
 
 const MEDIA_FILTERS: { value: MediaFilter; label: string }[] = [
-  { value: 'all', label: 'Notes' },
   { value: 'PHOTO', label: 'Photos' },
+  { value: 'all', label: 'Notes' },
   { value: 'VIDEO', label: 'Videos' },
 ]
 
@@ -73,7 +73,7 @@ export default function GalleryClient({
 />
       </div>
 
-      <SiteFooter nextProject={nextProject} destinations={destinations} />
+      <SiteFooter destinations={destinations} />
     </div>
   )
 }
