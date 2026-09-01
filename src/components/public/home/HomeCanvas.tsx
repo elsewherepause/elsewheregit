@@ -43,7 +43,14 @@ function computeCanvasWidth(slots: { l: number; w: number }[]) {
   return last.l + last.w + 250
 }
 
-const CATEGORIES = ['CULTURE', 'ADVENTURE'] as const
+const CATEGORIES = [
+  'CULTURE',
+  'CRAFT',
+  'NATURE',
+  'ADVENTURE',
+  'PEOPLE',
+] as const
+
 type Category = typeof CATEGORIES[number]
 
 export type HomeProject = {
