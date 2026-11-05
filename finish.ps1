@@ -108,7 +108,7 @@ if ($LASTEXITCODE -eq 0) {
 } else {
   git diff --cached --stat | Select-Object -Last 1
   $msg = 'Rebuild: one auto-layout story template, Open Rolls tabs, reliable publishing and uploads'
-  if ($rebuildExists) { $msg = 'Update rebuild: latest fixes' }
+  if ($rebuildExists) { $msg = 'Update rebuild: note photo frame, menu spacing, minimal scrollbar, fixes' }
   Git-Run 'Commit' commit -q -m $msg
   Step 5 "Uploading to the '$branch' branch"
   Git-Run 'Uploading' push -u origin $branch
@@ -126,6 +126,8 @@ else {
   if ($build -notmatch 'Updating the database') { $problems += 'The automatic database update is missing from scripts/build.js on GitHub.' }
   $editor = git ls-tree --name-only "refs/remotes/origin/$branch" src/components/admin/story-editor/StoryEditor.tsx
   if (-not $editor) { $problems += 'The new story editor is missing on GitHub.' }
+  $frame = git ls-tree --name-only "refs/remotes/origin/$branch" src/components/public/notes/PhotoFrame.tsx
+  if (-not $frame) { $problems += 'The note photo frame is missing on GitHub.' }
   $old = git ls-tree -d --name-only "refs/remotes/origin/$branch" src/components/templates
   if ($old) { $problems += 'The old template folder is still on GitHub.' }
   $diff = git diff --name-only "refs/remotes/origin/$branch" -- . ':(exclude).vscode'

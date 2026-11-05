@@ -7,6 +7,7 @@ import NoteLayout from '@/components/public/notes/NoteLayout'
 import { getNextNote } from '@/lib/utils/next-project'
 import { getAllDestinations } from '@/lib/utils/random-destination'
 import { sanitizeNoteHtml } from '@/lib/utils/sanitize'
+import { notePhotos } from '@/lib/notes/photos'
 
 export const revalidate = 300
 
@@ -33,7 +34,6 @@ export default async function NotePage({ params }: Props) {
   const note = await prisma.note.findFirst({ where: { slug, published: true }, include: { headerImage: true, footerImage: true } })
   if (!note) notFound()
   const [next, destinations] = await Promise.all([getNextNote(slug), getAllDestinations()])
-  const img = (m: typeof note.headerImage) => (m ? { cloudinaryId: m.cloudinaryId, width: m.width, height: m.height, altText: m.altText } : null)
   return (
     <div className="ew-page">
       <SiteNav />
@@ -42,8 +42,7 @@ export default async function NotePage({ params }: Props) {
           title={note.title}
           readTime={note.readTime}
           html={sanitizeNoteHtml(note.content)}
-          headerImage={img(note.headerImage)}
-          footerImage={img(note.footerImage)}
+          photos={notePhotos(note)}
         />
       </main>
       <SiteFooter

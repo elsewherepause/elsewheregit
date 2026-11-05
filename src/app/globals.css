@@ -45,6 +45,15 @@ a { color: inherit; text-decoration: none; }
 img, video { max-width: 100%; display: block; }
 :focus-visible { outline: 2px solid #1a5fd0; outline-offset: 2px; }
 
+/* ─── Scrollbar: just a slim bar, no track or arrows, square like the site’s bullets ── */
+::-webkit-scrollbar { width: 6px; height: 6px; background: transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #767676; }
+::-webkit-scrollbar-button, ::-webkit-scrollbar-corner { display: none; background: transparent; }
+/* Firefox (Chrome, Edge, Brave and Safari use the rules above) */
+@supports (-moz-appearance: none) { * { scrollbar-width: thin; scrollbar-color: #c4c4c4 transparent; } }
+
 /* ─── Tiptap editor ─────────────────────────────────────────────────────────── */
 .tiptap { outline: none; font-family: var(--font-body); }
 .tiptap p.is-editor-empty:first-child::before { color: var(--color-ink-faint); content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
@@ -290,3 +299,28 @@ img, video { max-width: 100%; display: block; }
   .hm-filter { position: absolute; left: 20px; top: 76px; }
   .hm-mobile .hm-cta { position: static; transform: none; display: flex; justify-content: center; padding: 8px 0 96px; }
 }
+
+/* ─── Note photos: rotating frame after the text ───────────────────────────── */
+/* overflow:clip (not hidden) so focusing an arrow can never scroll the frame sideways */
+.rf { margin: 80px 0 24px; padding: 8px 0; overflow: hidden; overflow: clip; }
+.rf-stage { --boxH: min(58vh, 560px); --boxW: min(42vw, 620px); position: relative; height: var(--boxH); perspective: 2200px; touch-action: pan-y; cursor: grab; user-select: none; }
+.rf-stage.drag { cursor: grabbing; }
+.rf-ring { position: absolute; left: 50%; top: 0; width: 0; height: 100%; transform-style: preserve-3d; transition: transform .9s cubic-bezier(.22,.8,.2,1); }
+.rf-stage.drag .rf-ring { transition: none; }
+.rf-item { position: absolute; left: 0; top: 0; height: 100%; width: var(--boxW); margin-left: calc(var(--boxW) / -2); display: flex; align-items: center; justify-content: center; backface-visibility: hidden; transition: opacity .6s; }
+.rf-item img { height: auto; max-width: none; object-fit: cover; box-shadow: 0 14px 40px rgba(0,0,0,.14); pointer-events: none; -webkit-user-drag: none; }
+.rf.flat .rf-item { transform: none; transition: opacity .8s; }
+.rf-arrow { position: absolute; top: 50%; z-index: 5; width: 44px; height: 64px; margin-top: -32px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: #0a0a0a; opacity: .55; transition: opacity .2s, transform .2s; }
+.rf-arrow:hover { opacity: 1; }
+.rf-arrow.l { left: calc(50% - var(--boxW) / 2 - 64px); }
+.rf-arrow.r { right: calc(50% - var(--boxW) / 2 - 64px); }
+.rf-arrow.l:hover { transform: translateX(-3px); }
+.rf-arrow.r:hover { transform: translateX(3px); }
+.rf-arrow svg { width: 16px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: square; }
+@media (max-width: 767px) {
+  .rf-stage { --boxW: 78vw; }
+  .rf-arrow { opacity: .8; }
+  .rf-arrow.l { left: 0; } .rf-arrow.r { right: 0; }
+  .rf-arrow.l:hover, .rf-arrow.r:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .rf-ring, .rf-item { transition: none; } }

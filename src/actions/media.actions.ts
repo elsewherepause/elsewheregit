@@ -44,11 +44,13 @@ async function usage(asset: MediaAsset): Promise<string[]> {
   const where: string[] = []
   const [gallery, notes, projects] = await Promise.all([
     prisma.galleryImage.count({ where: { imageId: asset.id } }),
-    prisma.note.findMany({ where: { OR: [{ headerImageId: asset.id }, { footerImageId: asset.id }] }, select: { title: true } }),
+    prisma.note.findMany({ select: { title: true, headerImageId: true, footerImageId: true, photos: true } }),
     prisma.project.findMany({ select: { title: true, story: true, templateData: true, heroImageId: true } }),
   ])
   if (gallery) where.push('Open Rolls')
-  for (const n of notes) where.push(`the note “${n.title}”`)
+  for (const n of notes) {
+    if (n.headerImageId === asset.id || n.footerImageId === asset.id || JSON.stringify(n.photos ?? '').includes(`"${asset.cloudinaryId}"`)) where.push(`the note “${n.title}”`)
+  }
   for (const p of projects) {
     const text = JSON.stringify(p.story ?? '') + JSON.stringify(p.templateData ?? '')
     if (p.heroImageId === asset.id || text.includes(`"${asset.cloudinaryId}"`)) where.push(`the story “${p.title}”`)

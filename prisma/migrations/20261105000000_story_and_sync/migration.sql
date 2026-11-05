@@ -44,3 +44,6 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   ALTER TABLE "Note" ADD CONSTRAINT "Note_footerImageId_fkey" FOREIGN KEY ("footerImageId") REFERENCES "MediaAsset"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Notes: list of photos for the rotating frame after the text
+ALTER TABLE "Note" ADD COLUMN IF NOT EXISTS "photos" JSONB;

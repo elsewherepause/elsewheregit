@@ -135,8 +135,8 @@ export default function SiteNav() {
                   </div>
                 </div>
 
-                {/* Stories list directly below heading */}
-                <nav className="flex flex-col space-y-3 mt-6" style={{ marginLeft: 85 }}>
+                {/* Stories list directly below heading. Roomy spacing; scrolls inside the screen if there are many stories. */}
+                <nav className="flex flex-col gap-[18px] mt-12 overflow-y-auto pr-4" style={{ marginLeft: 85, maxHeight: 'calc(100vh - 150px)' }}>
                   {isLoading ? (
                     <p className="text-lg" style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-ink-muted)' }}>
                       Loading stories...
@@ -171,7 +171,7 @@ export default function SiteNav() {
               className="md:hidden absolute inset-0 pt-20 px-6 pb-10 h-full overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-10">
                 <h2 style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: 14,
@@ -190,7 +190,7 @@ export default function SiteNav() {
                 </div>
               </div>
 
-              <nav className="flex flex-col space-y-3">
+              <nav className="flex flex-col gap-5 pb-24">
                 {isLoading ? (
                   <p className="text-base" style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-ink-muted)' }}>
                     Loading stories...

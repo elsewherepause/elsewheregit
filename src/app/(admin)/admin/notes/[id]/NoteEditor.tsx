@@ -9,10 +9,12 @@ import TiptapLink from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { updateNote, setNotePublished, deleteNote, type Note } from '@/actions/note.actions'
 import MediaPicker from '@/components/admin/media/MediaPicker'
+import MediaUploader from '@/components/admin/media/MediaUploader'
+import { toPhoto } from '@/components/admin/story-editor/Inspector'
 import { cloudinaryUrl } from '@/lib/utils/cloudinary-url'
 import { slugify } from '@/lib/utils/slugify'
+import { notePhotos, type NotePhoto } from '@/lib/notes/photos'
 
-type Img = { id: string; cid: string } | null
 type Msg = { ok: boolean; text: string } | null
 
 export default function NoteEditor({ note }: { note: Note }) {
@@ -20,9 +22,10 @@ export default function NoteEditor({ note }: { note: Note }) {
   const [title, setTitle] = useState(note.title)
   const [slug, setSlug] = useState(note.slug)
   const [readTime, setReadTime] = useState(note.readTime)
-  const [header, setHeader] = useState<Img>(note.headerImageId && note.headerImage ? { id: note.headerImageId, cid: note.headerImage.cloudinaryId } : null)
-  const [footer, setFooter] = useState<Img>(note.footerImageId && note.footerImage ? { id: note.footerImageId, cid: note.footerImage.cloudinaryId } : null)
-  const [picker, setPicker] = useState<'header' | 'footer' | null>(null)
+  // Older notes have a header/footer photo; they start the list so nothing is lost.
+  const [photos, setPhotos] = useState<NotePhoto[]>(() => notePhotos(note))
+  const [open, setOpen] = useState<number | null>(null)
+  const [picker, setPicker] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [msg, setMsg] = useState<Msg>(null)
   const [pending, start] = useTransition()
@@ -46,7 +49,15 @@ export default function NoteEditor({ note }: { note: Note }) {
   }, [dirty])
 
   const touch = <T,>(fn: (v: T) => void) => (v: T) => { fn(v); setDirty(true) }
-  const payload = () => ({ title, slug: slugify(slug || title), readTime, content: editor?.getHTML() ?? note.content, headerImageId: header?.id ?? null, footerImageId: footer?.id ?? null })
+  const setList = (list: NotePhoto[]) => { setPhotos(list); setDirty(true) }
+  const addPhotos = (list: NotePhoto[]) => setList([...photos, ...list.filter(p => !photos.some(x => x.id === p.id))])
+  const move = (i: number, d: number) => {
+    const j = i + d
+    if (j < 0 || j >= photos.length) return
+    const next = [...photos]; [next[i], next[j]] = [next[j], next[i]]; setList(next); setOpen(j)
+  }
+  const patch = (i: number, p: Partial<NotePhoto>) => setList(photos.map((x, k) => (k === i ? { ...x, ...p } : x)))
+  const payload = () => ({ title, slug: slugify(slug || title), readTime, content: editor?.getHTML() ?? note.content, photos })
 
   function save(then?: 'publish' | 'unpublish') {
     start(async () => {
@@ -71,27 +82,9 @@ export default function NoteEditor({ note }: { note: Note }) {
     })
   }
 
-  const tool = (label: string, title: string, action: () => void, active: boolean) => (
-    <button key={label} type="button" title={title} aria-pressed={active} onClick={action}
+  const tool = (label: string, hint: string, action: () => void, active: boolean) => (
+    <button key={label} type="button" title={hint} aria-pressed={active} onClick={action}
       className={`px-2 py-1 text-xs border ${active ? 'bg-black text-white border-black' : 'border-[var(--color-border)] hover:border-black'}`}>{label}</button>
-  )
-  const imgSlot = (which: 'header' | 'footer', img: Img, set: (v: Img) => void, help: string) => (
-    <div>
-      <span className="block text-[11px] font-semibold text-[#505050] mb-1">{which === 'header' ? 'Header photo' : 'Footer photo'}</span>
-      {img ? (
-        <div className="flex items-end gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={cloudinaryUrl(img.cid, { width: 240, height: 160, crop: 'fill' })} alt="" className="w-32 h-20 object-cover" />
-          <div className="flex flex-col gap-1 text-xs">
-            <button type="button" className="underline text-left" onClick={() => setPicker(which)}>Change</button>
-            <button type="button" className="underline text-left text-[#a33a1a]" onClick={() => touch(set)(null)}>Remove</button>
-          </div>
-        </div>
-      ) : (
-        <button type="button" onClick={() => setPicker(which)} className="w-full h-16 border border-dashed border-[#c8c8c6] text-xs text-[#505050] hover:border-black">Choose a photo</button>
-      )}
-      <span className="block text-[11px] text-[#767676] mt-1">{help}</span>
-    </div>
   )
 
   return (
@@ -111,7 +104,7 @@ export default function NoteEditor({ note }: { note: Note }) {
         )}
         <EditorContent editor={editor} />
       </div>
-      <aside className="w-72 shrink-0 border-l border-[var(--color-border)] overflow-y-auto bg-[var(--color-admin-bg)] p-5 space-y-6">
+      <aside className="w-80 shrink-0 border-l border-[var(--color-border)] overflow-y-auto bg-[var(--color-admin-bg)] p-5 space-y-6">
         <div className="space-y-2">
           <p className={`text-[11px] ${dirty ? 'text-[#a35a00]' : note.published ? 'text-[#1f7a3f]' : 'text-[#767676]'}`} role="status">
             {pending ? 'Saving…' : dirty ? 'Unsaved changes' : note.published ? 'Published · all changes saved' : 'Draft · all changes saved'}
@@ -132,17 +125,45 @@ export default function NoteEditor({ note }: { note: Note }) {
         </div>
         <div><label className="block text-[11px] font-semibold text-[#505050] mb-1" htmlFor="n-slug">Web address</label><input id="n-slug" className="field-input font-mono" value={slug} onChange={e => touch(setSlug)(e.target.value)} onBlur={() => setSlug(slugify(slug || title))} /></div>
         <div><label className="block text-[11px] font-semibold text-[#505050] mb-1" htmlFor="n-rt">Read time</label><input id="n-rt" className="field-input" value={readTime} onChange={e => touch(setReadTime)(e.target.value)} placeholder="2 min read" /></div>
-        {imgSlot('header', header, setHeader, 'Sits above the title and grows as the reader reaches the end.')}
-        {imgSlot('footer', footer, setFooter, 'Shown after the text.')}
+
+        <div className="space-y-2">
+          <span className="block text-[11px] font-semibold text-[#505050]">Photos</span>
+          <span className="block text-[11px] text-[#767676]">Shown after the text in a rotating frame, in this order. Add as many as you like.</span>
+          <MediaUploader zone accept="image" onUploaded={list => addPhotos(list.map(toPhoto))} />
+          <button type="button" className="text-xs underline" onClick={() => setPicker(true)}>Choose from the media library</button>
+          <ul className="space-y-1.5 pt-1">
+            {photos.map((p, i) => (
+              <li key={`${p.id}-${i}`} className={`border bg-white ${open === i ? 'border-black' : 'border-[#e8e8e8]'}`}>
+                <div className="flex items-center gap-2 p-1.5">
+                  <button type="button" className="flex items-center gap-2 flex-1 min-w-0 text-left" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cloudinaryUrl(p.id, { height: 80, crop: 'limit' })} alt="" style={{ height: 40, width: 'auto', aspectRatio: `${p.w} / ${p.h}` }} className="bg-[#f0f0ee] block" />
+                    <span className="min-w-0">
+                      <span className="block text-[11px] font-semibold truncate">{p.caption || `Photo ${i + 1}`}</span>
+                      <span className="block text-[10px] text-[#767676]">{i === 0 ? 'Shown first' : `${i + 1} of ${photos.length}`}</span>
+                    </span>
+                  </button>
+                  <span className="flex">
+                    <button type="button" className="w-7 h-7 text-[#767676] hover:text-black disabled:opacity-20" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">↑</button>
+                    <button type="button" className="w-7 h-7 text-[#767676] hover:text-black disabled:opacity-20" disabled={i === photos.length - 1} onClick={() => move(i, 1)} aria-label="Move down">↓</button>
+                    <button type="button" className="w-7 h-7 text-[#767676] hover:text-[#a33a1a]" onClick={() => { setList(photos.filter((_, k) => k !== i)); setOpen(null) }} aria-label="Remove photo">×</button>
+                  </span>
+                </div>
+                {open === i && (
+                  <div className="border-t border-[#e8e8e8] p-2.5 space-y-2.5">
+                    <div><label className="block text-[11px] font-semibold text-[#505050] mb-1" htmlFor={`ncap-${i}`}>Caption (for your reference and screen readers)</label><input id={`ncap-${i}`} className="field-input" value={p.caption ?? ''} onChange={e => patch(i, { caption: e.target.value })} /></div>
+                    <div><label className="block text-[11px] font-semibold text-[#505050] mb-1" htmlFor={`nalt-${i}`}>Describe the photo (for screen readers)</label><input id={`nalt-${i}`} className="field-input" value={p.alt ?? ''} onChange={e => patch(i, { alt: e.target.value })} /></div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          {photos.length === 0 && <p className="text-[11px] text-[#767676]">No photos. The note will be text only.</p>}
+        </div>
+
         <div className="pt-4 border-t border-[var(--color-border)]"><button type="button" onClick={remove} className="text-xs text-[#a33a1a] underline">Delete this note</button></div>
       </aside>
-      {picker && (
-        <MediaPicker
-          title={picker === 'header' ? 'Choose the header photo' : 'Choose the footer photo'}
-          onClose={() => setPicker(null)}
-          onSelect={list => { const a = list[0]; const v = { id: a.id, cid: a.cloudinaryId }; if (picker === 'header') touch(setHeader)(v); else touch(setFooter)(v) }}
-        />
-      )}
+      {picker && <MediaPicker multiple title="Add photos to this note" onClose={() => setPicker(false)} onSelect={l => addPhotos(l.map(toPhoto))} />}
     </div>
   )
 }

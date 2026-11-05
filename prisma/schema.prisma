@@ -173,6 +173,10 @@ model Note {
   footerImageId String?
   footerImage   MediaAsset? @relation("NoteFooter", fields: [footerImageId], references: [id], onDelete: SetNull)
 
+  // Photos shown in the rotating frame after the text: [{ id, w, h, alt?, caption? }].
+  // null on older notes, which show their header/footer photo instead.
+  photos Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

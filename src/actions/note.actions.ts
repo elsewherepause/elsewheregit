@@ -5,6 +5,8 @@ import { revalidatePath, refresh } from 'next/cache'
 import { adminAction, UserError, type Result } from '@/lib/action'
 import { slugify } from '@/lib/utils/slugify'
 import { sanitizeNoteHtml } from '@/lib/utils/sanitize'
+import { NotePhotos, type NotePhoto } from '@/lib/notes/photos'
+import type { Prisma } from '@prisma/client'
 
 export type Note = {
   id: string
@@ -14,9 +16,10 @@ export type Note = {
   readTime: string
   published: boolean
   headerImageId?: string | null
-  headerImage?: { cloudinaryId: string; altText: string | null } | null
+  headerImage?: { cloudinaryId: string; altText: string | null; width: number; height: number } | null
   footerImageId?: string | null
-  footerImage?: { cloudinaryId: string; altText: string | null } | null
+  footerImage?: { cloudinaryId: string; altText: string | null; width: number; height: number } | null
+  photos?: unknown
   createdAt: Date
   updatedAt: Date
 }
@@ -49,6 +52,7 @@ export async function updateNote(id: string, data: {
   readTime?: string
   headerImageId?: string | null
   footerImageId?: string | null
+  photos?: NotePhoto[]
 }): Promise<Result> {
   return adminAction(async () => {
     const before = await prisma.note.findUnique({ where: { id }, select: { slug: true } })
@@ -60,7 +64,14 @@ export async function updateNote(id: string, data: {
       if (await prisma.note.findFirst({ where: { slug: data.slug, NOT: { id } } })) throw new UserError('Another note already uses that web address.')
     }
     if (data.content !== undefined) data.content = sanitizeNoteHtml(data.content)
-    await prisma.note.update({ where: { id }, data })
+    const { photos, ...rest } = data
+    let photosValue: Prisma.InputJsonValue | undefined
+    if (photos !== undefined) {
+      const parsed = NotePhotos.safeParse(photos)
+      if (!parsed.success) throw new UserError('Some photos couldn’t be saved. Remove the last one you added and try again.')
+      photosValue = parsed.data as Prisma.InputJsonValue
+    }
+    await prisma.note.update({ where: { id }, data: { ...rest, ...(photosValue !== undefined ? { photos: photosValue } : {}) } })
     touch([before.slug, data.slug ?? before.slug])
     refresh()
     return undefined
