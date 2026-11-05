@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Story, emptyStory } from './types'
 import { legacyMediaIds, storyFromLegacy } from './legacy'
+import { withRealSizes } from './sizes'
 
 type ProjectLike = {
   title: string
@@ -17,7 +18,7 @@ type ProjectLike = {
 export async function loadStory(p: ProjectLike): Promise<{ story: Story; converted: boolean }> {
   if (p.story) {
     const parsed = Story.safeParse(p.story)
-    if (parsed.success) return { story: parsed.data, converted: false }
+    if (parsed.success) return { story: await withRealSizes(parsed.data), converted: false }
     console.error('Stored story failed validation, falling back to legacy data', parsed.error.issues.slice(0, 3))
   }
   const blocks = p.blocks ?? []
@@ -28,7 +29,7 @@ export async function loadStory(p: ProjectLike): Promise<{ story: Story; convert
     : []
   const dims = new Map(assets.map(a => [a.cloudinaryId, { w: a.width, h: a.height }]))
   return {
-    story: storyFromLegacy({ title: p.title, templateData: p.templateData, blocks, heroImage: p.heroImage ?? null, dims }),
+    story: await withRealSizes(storyFromLegacy({ title: p.title, templateData: p.templateData, blocks, heroImage: p.heroImage ?? null, dims })),
     converted: true,
   }
 }

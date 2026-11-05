@@ -131,10 +131,17 @@ img, video { max-width: 100%; display: block; }
 .st-toggle button[aria-pressed="true"] { color: #1c1c1c; }
 .st-toggle i { width: 1px; height: 22px; background: #1c1c1c; display: block; }
 
-.st-body { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 48px; }
+.st-body { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 48px; }
 .st-body.no-rail { grid-template-columns: minmax(0, 1fr); }
-.st-rail { position: sticky; top: 96px; align-self: start; display: flex; flex-direction: column; gap: 14px; padding-top: 6px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; }
-.st-rail a { color: var(--ew-muted); display: flex; gap: 8px; align-items: baseline; line-height: 1.3; }
+/* Chapter list: a full-screen-tall column that stays put while you read and keeps the
+   list centred in the middle of the screen. It ends with the story, so it never
+   reaches the footer. Long lists scroll inside it instead of running off screen. */
+.st-rail { position: sticky; top: 0; align-self: start; height: 100vh; padding: 72px 0 24px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto; scrollbar-width: none; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; }
+.st-rail::-webkit-scrollbar { display: none; }
+/* auto margins centre the list but, unlike justify-content:center, never cut off the top when it is long */
+.st-rail > :first-child { margin-top: auto; }
+.st-rail > :last-child { margin-bottom: auto; }
+.st-rail a { color: var(--ew-muted); display: flex; gap: 8px; align-items: baseline; line-height: 1.45; letter-spacing: .02em; }
 .st-rail a:hover { color: #000; }
 .st-rail a.on { color: #000; font-weight: 600; }
 .st-rail a.on::before { content: ""; width: 7px; height: 7px; background: #000; flex: none; transform: translateY(-1px); }
