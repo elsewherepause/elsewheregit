@@ -16,7 +16,7 @@ export default function SiteNav() {
   const [stories, setStories] = useState<{slug: string, title: string}[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const pathname = usePathname()
-  const label = PAGE_LABELS[pathname]
+  const label = pathname.startsWith('/notes/') ? 'Open Rolls' : PAGE_LABELS[pathname]
   const isAbout = pathname === '/about'
 
   useEffect(() => {
@@ -115,94 +115,28 @@ export default function SiteNav() {
               {/* Top bar: MENU, STORIES column, nav links */}
               <div className="absolute right-0 top-0 px-10 py-5 pointer-events-auto">
                 {/* Top line: MENU, STORIES, OPEN ROLLS, THE AUTHOR */}
-                <div
-  style={{
-    position: 'relative',
-    width: 700,
-    height: 40,
-  }}
->
-  <div
-    style={{
-      position: 'absolute',
-      left: 20,      // MENU
-      top: 0,
-    }}
-  >
-    {menuButton}
-  </div>
+                <div className="flex items-baseline gap-10">
+                  {menuButton}
+                  <h2 style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 14,
+                    fontWeight: isAbout ? 500 : 700,
+                    textTransform: 'uppercase',
+                    color: isAbout ? 'var(--color-ink-muted)' : 'var(--color-ink)',
+                    letterSpacing: '0.05em',
+                    margin: 0,
+                  }}>Stories</h2>
 
-  <h2
-    style={{
-      position: 'absolute',
-      left: 110,    // STORIES
-      top: 3,
-      fontFamily: 'var(--font-sans)',
-      fontSize: 14,
-      fontWeight: isAbout ? 500 : 700,
-      textTransform: 'uppercase',
-      color: isAbout ? 'var(--color-ink-muted)' : 'var(--color-ink)',
-      letterSpacing: '0.05em',
-      margin: 0,
-    }}
-  >
-    Stories
-  </h2>
-
-  <Link
-    href="/gallery"
-    onClick={() => setMenuOpen(false)}
-    style={{
-      position: 'absolute',
-      left: 360,    // OPEN ROLLS
-      top: 0,
-      fontFamily: 'var(--font-sans)',
-      fontSize: 14,
-      fontWeight: 500,
-      textTransform: 'uppercase',
-      color: 'var(--color-ink)',
-      textDecoration: 'none',
-    }}
-  >
-    Open Rolls
-  </Link>
-
-  <Link
-    href="/about"
-    onClick={() => setMenuOpen(false)}
-    style={{
-      position: 'absolute',
-      left: 520,    // THE AUTHOR
-      top: 0,
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 8,
-      fontFamily: 'var(--font-sans)',
-      fontSize: 14,
-      fontWeight: isAbout ? 700 : 500,
-      textTransform: 'uppercase',
-      color: 'var(--color-ink)',
-      textDecoration: 'none',
-    }}
-  >
-    The Author
-    <span
-  style={{
-    position: 'relative',
-    top: 4,          // positive = down, negative = up
-    marginLeft: 3,
-    fontSize: 14,
-    fontWeight: 400,
-    lineHeight: 1,
-  }}
->
-  ✕
-</span>
-  </Link>
-</div>
+                  <div className="flex gap-6 uppercase items-baseline" style={{ paddingLeft: 80, fontFamily: 'var(--font-sans)', fontSize: 14, letterSpacing: '0.01em' }}>
+                    <Link href="/gallery" onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-70 transition-opacity no-underline" style={{ color: 'var(--color-ink)', fontWeight: 500 }}>Open Rolls</Link>
+                    <Link href="/about" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity no-underline" style={{ color: 'var(--color-ink)', fontWeight: isAbout ? 700 : 500 }}>
+                      The Author <span className="w-1.5 h-1.5 bg-current"></span>
+                    </Link>
+                  </div>
+                </div>
 
                 {/* Stories list directly below heading */}
-                <nav className="flex flex-col space-y-3 mt-6" style={{ marginLeft: 110 }}>
+                <nav className="flex flex-col space-y-3 mt-6" style={{ marginLeft: 85 }}>
                   {isLoading ? (
                     <p className="text-lg" style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-ink-muted)' }}>
                       Loading stories...

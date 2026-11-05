@@ -1,56 +1,30 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { createNote } from '@/actions/note.actions'
+import { slugify } from '@/lib/utils/slugify'
 
 export default function NewNotePage() {
-  const [state, action, pending] = useActionState(createNote, undefined)
-
+  const router = useRouter()
+  const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
+  const [touched, setTouched] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, start] = useTransition()
+  const shown = touched ? slug : slugify(title)
   return (
     <div className="p-8 max-w-lg">
-      <h1 className="text-2xl font-medium mb-8" style={{ fontFamily: 'var(--font-heading)' }}>
-        New Note
-      </h1>
-
-      <form action={action} className="space-y-5">
-        {state?.error && (
-          <p className="text-sm text-[var(--color-accent)]">{state.error}</p>
-        )}
-
-        <div className="space-y-1">
-          <label htmlFor="title" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Title *
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            required
-            autoFocus
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--color-ink)] transition-colors"
-          />
+      <h1 className="text-2xl font-medium mb-8" style={{ fontFamily: 'var(--font-heading)' }}>New note</h1>
+      <form className="space-y-5" onSubmit={e => { e.preventDefault(); start(async () => { setError(null); const r = await createNote({ title, slug: shown }); if (!r.ok) setError(r.error); else router.push(`/admin/notes/${r.data.id}`) }) }}>
+        {error && <p role="alert" className="text-sm text-[#a33a1a] bg-[#fdf1ed] border border-[#f0c9bd] px-3 py-2">{error}</p>}
+        <div><label htmlFor="title" className="block text-xs font-semibold text-[#505050] mb-1">Title</label><input id="title" required autoFocus value={title} onChange={e => setTitle(e.target.value)} className="field-input !text-sm !py-2.5" /></div>
+        <div>
+          <label htmlFor="slug" className="block text-xs font-semibold text-[#505050] mb-1">Web address</label>
+          <input id="slug" value={shown} onChange={e => { setTouched(true); setSlug(e.target.value) }} className="field-input !text-sm !py-2.5 font-mono" placeholder="filled in from the title" />
+          <span className="block text-xs text-[#767676] mt-1">elsewhere.ink/notes/{shown || '…'}</span>
         </div>
-
-        <div className="space-y-1">
-          <label htmlFor="slug" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Slug <span className="normal-case text-[var(--color-ink-faint)]">(auto-generated if blank)</span>
-          </label>
-          <input
-            id="slug"
-            name="slug"
-            type="text"
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-[var(--color-ink)] transition-colors"
-            placeholder="my-note-slug"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="px-6 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-40"
-        >
-          {pending ? 'Creating…' : 'Create Note'}
-        </button>
+        <button type="submit" disabled={pending || !title.trim()} className="px-6 py-2.5 bg-black text-white text-xs font-semibold disabled:opacity-40">{pending ? 'Creating…' : 'Create note'}</button>
       </form>
     </div>
   )

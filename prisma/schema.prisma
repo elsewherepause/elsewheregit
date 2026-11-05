@@ -19,17 +19,24 @@ model AdminUser {
   updatedAt    DateTime @updatedAt
 }
 
-// ─── Projects ─────────────────────────────────────────────────────────────────
+// ─── Stories (called Project in the database) ─────────────────────────────────
 
 model Project {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
-  slug        String    @unique
-  description String?   @db.Text
+  slug        String  @unique
+  description String? @db.Text
 
-  template    ProjectTemplate @default(CUSTOM)
+  // The story itself: cover + ordered blocks, laid out automatically on the site.
+  // See src/lib/story/types.ts for the shape.
+  story Json?
+
+  // Legacy fields from the old Template 1–4 system. Kept read-only as a backup;
+  // stories without `story` are converted from these on the fly.
+  template     ProjectTemplate @default(CUSTOM)
   templateData Json?
-  category    ProjectCategory?
+
+  category ProjectCategory?
 
   heroImageId String?
   heroImage   MediaAsset? @relation("ProjectHero", fields: [heroImageId], references: [id], onDelete: SetNull)
@@ -45,7 +52,7 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  blocks      ContentBlock[]
+  blocks ContentBlock[]
 
   @@index([slug])
   @@index([published, publishedAt])
@@ -64,8 +71,7 @@ enum ProjectCategory {
   ADVENTURE
 }
 
-// ─── Content Blocks ───────────────────────────────────────────────────────────
-
+// Legacy: blocks from the very first editor. Read only, converted into `story`.
 model ContentBlock {
   id        String    @id @default(cuid())
   projectId String
@@ -109,16 +115,16 @@ model MediaAsset {
 
   createdAt DateTime @default(now())
 
-  heroProjects  Project[]            @relation("ProjectHero")
-  ogProjects    Project[]            @relation("ProjectOg")
-  galleryImages GalleryImage[]       @relation("GalleryImageAsset")
-  noteHeaders   Note[]               @relation("NoteHeader")
-  noteFooters   Note[]               @relation("NoteFooter")
+  heroProjects  Project[]      @relation("ProjectHero")
+  ogProjects    Project[]      @relation("ProjectOg")
+  galleryImages GalleryImage[] @relation("GalleryImageAsset")
+  noteHeaders   Note[]         @relation("NoteHeader")
+  noteFooters   Note[]         @relation("NoteFooter")
 
   @@index([createdAt])
 }
 
-// ─── Gallery ──────────────────────────────────────────────────────────────────
+// ─── Open Rolls (gallery) ─────────────────────────────────────────────────────
 
 enum GalleryMediaType {
   PHOTO
@@ -126,27 +132,19 @@ enum GalleryMediaType {
 }
 
 model GalleryImage {
-  id String @id @default(cuid())
+  id      String     @id @default(cuid())
+  imageId String
+  image   MediaAsset @relation("GalleryImageAsset", fields: [imageId], references: [id], onDelete: Cascade)
 
-  // Existing Cloudinary image (optional for YouTube videos)
-  imageId String?
-  image MediaAsset? @relation("GalleryImageAsset", fields: [imageId], references: [id], onDelete: Cascade)
-
-  // Media type
-  mediaType GalleryMediaType @default(PHOTO)
-
-  // YouTube support
-  youtubeUrl String?
-  youtubeVideoId String?
-
-  // Existing fields
-  altText String?
-  caption String?
-  description String? @db.Text
-  category String?
+  altText     String?
+  caption     String?
+  description String?          @db.Text
+  category    String?
+  mediaType   GalleryMediaType @default(PHOTO)
   imageAdjust Json?
 
-  order Int @default(0)
+  // Lower numbers show first. New items get the lowest number, so they appear first.
+  order     Int     @default(0)
   published Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -155,18 +153,17 @@ model GalleryImage {
   @@index([order])
   @@index([category])
   @@index([published])
-  @@index([youtubeVideoId])
 }
 
 // ─── Notes ────────────────────────────────────────────────────────────────────
 
 model Note {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   title     String
-  slug      String   @unique
-  content   String   @db.Text
-  readTime  String   @default("2 min read")
-  published Boolean  @default(true)
+  slug      String  @unique
+  content   String  @db.Text
+  readTime  String  @default("2 min read")
+  published Boolean @default(true)
 
   headerImageId String?
   headerImage   MediaAsset? @relation("NoteHeader", fields: [headerImageId], references: [id], onDelete: SetNull)
@@ -179,4 +176,3 @@ model Note {
 
   @@index([published])
 }
-

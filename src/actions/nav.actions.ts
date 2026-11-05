@@ -1,21 +1,13 @@
-'use server';
+'use server'
 
-import { prisma } from '@/lib/prisma';
+import { getStoryOrder } from '@/lib/utils/next-project'
 
+/** Stories for the menu, newest first. Public — no login needed. */
 export async function getNavProjects() {
   try {
-    const projects = await prisma.project.findMany({
-      where: { published: true },
-      select: {
-        slug: true,
-        title: true,
-      },
-      orderBy: { publishedAt: 'asc' },
-    });
-    return projects;
+    return await getStoryOrder()
   } catch (error) {
-    console.error("Error fetching nav projects from database:", error);
-    return [];
+    console.error('Error fetching nav projects:', error)
+    return []
   }
 }
-

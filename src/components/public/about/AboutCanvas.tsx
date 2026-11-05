@@ -55,7 +55,7 @@ export default function AboutCanvas() {
         </p>
 
         {/* ── Intro paragraph ── */}
-        <p style={{ position: 'absolute', left: 784, top: 220, width: 448, color: '#505050', fontSize: 16, fontWeight: 400, textAlign: 'justify', lineHeight: '1.6', margin: 0, ...mont }}>
+        <p style={{ position: 'absolute', left: 984, top: 220, width: 448, color: '#505050', fontSize: 16, fontWeight: 400, textAlign: 'justify', lineHeight: '1.6', margin: 0, ...mont }}>
           I work where movement, culture, and human experience meet. I go slowly, and I stay long enough for a place to reveal what it is.
         </p>
 
@@ -65,7 +65,7 @@ export default function AboutCanvas() {
         </div>
 
         {/* ── Moto photo ── */}
-        <div style={{ position: 'absolute', height: 326, left: 1016, top: 315, width: 216, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', height: 326, left: 1216, top: 315, width: 216, overflow: 'hidden' }}>
           <img alt="" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/arjun-moto.png" />
         </div>
 
@@ -80,12 +80,12 @@ export default function AboutCanvas() {
         </div>
 
         {/* ── Bio text 2 ── */}
-        <p style={{ position: 'absolute', left: 613, top: 1250, width: 285, color: '#505050', fontSize: 16, fontWeight: 400, textAlign: 'justify', lineHeight: '1.6', margin: 0, ...mont }}>
+        <p style={{ position: 'absolute', left: 613, top: 1350, width: 285, color: '#505050', fontSize: 16, fontWeight: 400, textAlign: 'justify', lineHeight: '1.6', margin: 0, ...mont }}>
           {`I am drawn to stories of risk, repair, and survival, the kind that rarely travel far from where they were made. Stories that live in local governance, biodiversity, and oral traditions passed between generations, often in languages that were never written down. Wherever I go, I am humbled by the trust people place in me, to listen carefully and to carry what I hear with care.`}
         </p>
 
         {/* ── River scene image ── */}
-        <div style={{ position: 'absolute', height: 249, left: 944, top: 950, width: 448, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', height: 249, left: 984, top: 1150, width: 448, overflow: 'hidden' }}>
           <img alt="" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/river-scene.png" />
         </div>
 
@@ -105,7 +105,7 @@ export default function AboutCanvas() {
         </div>
 
         {/* ── Elsewhere section ── */}
-        <div style={{ position: 'absolute', left: 80, top: 2400, width: 373, color: '#505050', fontSize: 16 }}>
+        <div style={{ position: 'absolute', left: 80, top: 2300, width: 373, color: '#505050', fontSize: 16 }}>
           <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 0, marginRight: 0, marginBottom: 12, marginLeft: 0, ...mont }}>Elsewhere</p>
           <p style={{ fontWeight: 400, lineHeight: 1.6, textAlign: 'justify', margin: 0, ...mont }}>
             Elsewhere began as a question: what happens when you stay somewhere long enough for it to stop performing for you?
@@ -126,7 +126,7 @@ export default function AboutCanvas() {
           <img alt="Taste of Konkan" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/taste-of-konkan.png" />
         </div>
 
-        <div style={{ position: 'absolute', left: 580, top: 2950, width: 550, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
+        <div style={{ position: 'absolute', left: 580, top: 2900, width: 550, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
           <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 0, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}>For Brands and Institutions</p>
           <p style={{ fontWeight: 400, textAlign: 'justify', margin: 0 }}>
             Elsewhere works with brands, institutions, and cultural ventures that need more than content. The practice is concerned with how stories are found, shaped, and carried across image, language, experience, and form.
@@ -135,40 +135,15 @@ export default function AboutCanvas() {
         </div>
 
         {/* ── Shaped by Time Section (Text + Portrait) ── */}
-        <div style={{ position: 'absolute', left: 580, top: 3130, width: 520, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
+        <div style={{ position: 'absolute', left: 580, top: 3150, width: 520, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
           <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 0, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}>Narrative Research</p>
           <p style={{ fontWeight: 400, textAlign: 'justify', marginTop: 0, marginRight: 0, marginBottom: 40, marginLeft: 0 }}>
             Field-grounded inquiry into people, place, material culture, and lived context. This roots a brand, publication, or institution in real understanding before it begins to speak.
           </p>
-          <p style={{ top: 3150, fontWeight: 700, lineHeight: 'normal', marginTop: 100, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}></p>
-<div
-  style={{
-    position: 'relative',
-    top: -40, // Move Story Strategy up (adjust this value)
-  }}
->
-  <p
-    style={{
-      fontWeight: 700,
-      lineHeight: 'normal',
-      margin: 0,
-      color: '#000',
-    }}
-  >
-    Story Strategy
-  </p>
-
-  <p
-    style={{
-      fontWeight: 400,
-      textAlign: 'justify',
-      marginTop: 12,
-      marginBottom: 0,
-    }}
-  >
-    Narrative direction for campaigns, brand worlds, editorial platforms, and cultural initiatives. This covers theme, language, structure, and the shape a story needs to take.
-  </p>
-</div>
+          <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 100, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}>Story Strategy</p>
+          <p style={{ fontWeight: 400, textAlign: 'justify', margin: 0 }}>
+            Narrative direction for campaigns, brand worlds, editorial platforms, and cultural initiatives. This covers theme, language, structure, and the shape a story needs to take.
+          </p>
         </div>
 
         <div style={{ position: 'absolute', height: 420, left: 1150, top: 3200, width: 280, overflow: 'hidden' }}>
@@ -180,7 +155,7 @@ export default function AboutCanvas() {
           <img alt="Editorial and documentary commission" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/rebuilding-tsunami.png" />
         </div>
 
-        <div style={{ position: 'absolute', left: 580, top: 3470, width: 550, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
+        <div style={{ position: 'absolute', left: 580, top: 3570, width: 550, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
           <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 0, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}>Editorial and Documentary Commissions</p>
           <p style={{ fontWeight: 400, textAlign: 'justify', margin: 0 }}>
             Work made through time spent close to the subject, taking the form of photography, film, sound, writing, printed matter, digital formats, or whatever form the story asks for.
@@ -188,19 +163,19 @@ export default function AboutCanvas() {
         </div>
 
         {/* ── Cultural Advisory (Text + Image) ── */}
-        <div style={{ position: 'absolute', left: 580, top: 3650, width: 520, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
+        <div style={{ position: 'absolute', left: 580, top: 3800, width: 520, color: '#505050', fontSize: 16, lineHeight: 1.6, ...mont }}>
           <p style={{ fontWeight: 700, lineHeight: 'normal', marginTop: 0, marginRight: 0, marginBottom: 12, marginLeft: 0, color: '#000' }}>Cultural Advisory</p>
           <p style={{ fontWeight: 400, textAlign: 'justify', margin: 0 }}>
             Selective work with brands and founders in mobility, craft, heritage, and lifestyle, helping them locate what is distinctive and what will resonate.
           </p>
         </div>
 
-        <div style={{ position: 'absolute', height: 420, left: 1150, top: 3750, width: 280, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', height: 420, left: 1150, top: 3850, width: 280, overflow: 'hidden' }}>
           <img alt="Cultural advisory work" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/mandur-trees.png" />
         </div>
 
         {/* ── Engagements transitional line ── */}
-        <p style={{ position: 'absolute', left: 306, top: 4270, width: 900, color: '#000', fontSize: 24, fontWeight: 500, textAlign: 'center', lineHeight: 1.5, margin: 0, ...dm }}>
+        <p style={{ position: 'absolute', left: 306, top: 4370, width: 900, color: '#000', fontSize: 24, fontWeight: 500, textAlign: 'center', lineHeight: 1.5, margin: 0, ...dm }}>
           Engagements may begin with a conversation, a field visit, a commission, or a single question that needs patient looking. If something here has slowed you down, and this way of working feels familiar, I would like to hear what you are building.
         </p>
 
@@ -236,22 +211,29 @@ export default function AboutCanvas() {
           </p>
           <div style={{ display: 'flex', gap: 71, alignItems: 'center' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11, width: 70 }}>
-              
+              <p style={{ fontWeight: 400, fontSize: 14, color: '#505050', textTransform: 'uppercase', margin: 0, ...mont }}>Based in</p>
+              <p style={{ fontWeight: 500, fontSize: 22, color: '#000', margin: 0, ...dm }}>India</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-              
-           
+              <p style={{ fontWeight: 400, fontSize: 14, color: '#505050', textTransform: 'uppercase', margin: 0, ...mont }}>Email</p>
+              <a href="mailto:arjun@elsewhere.ink" style={{ fontWeight: 500, fontSize: 22, color: '#000', textDecoration: 'underline', whiteSpace: 'nowrap', display: 'block', ...dm }}>
+                arjun@elsewhere.ink
+              </a>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-              
+              <p style={{ fontWeight: 400, fontSize: 14, color: '#505050', textTransform: 'uppercase', margin: 0, ...mont }}>Response time</p>
+              <p style={{ fontWeight: 500, fontSize: 22, color: '#000', whiteSpace: 'nowrap', margin: 0, ...dm }}>Unhurried. Within a few days.</p>
             </div>
           </div>
         </div>
 
-        {/* ── Contact form ── */}
-<div style={{ position: 'absolute', left: 80, top: 5444 }}>
-  <ContactForm />
-</div>
+        {/* ── Photo + Contact form ── */}
+        <div style={{ position: 'absolute', left: 80, top: 5444, display: 'flex', gap: 118, alignItems: 'flex-start' }}>
+          <div style={{ height: 565, width: 469, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+            <img alt="" style={{ position: 'absolute', inset: 0, maxWidth: 'none', objectFit: 'cover', width: '100%', height: '100%' }} src="/images/neeruganti-landscape.png" />
+          </div>
+          <ContactForm />
+        </div>
 
         {/* ── .elsewhere footer wordmark ── */}
         <div style={{ position: 'absolute', left: 0, top: 6144, width: W }}>

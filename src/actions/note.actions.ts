@@ -1,11 +1,10 @@
 'use server'
 
-import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { revalidatePath, refresh } from 'next/cache'
+import { adminAction, UserError, type Result } from '@/lib/action'
 import { slugify } from '@/lib/utils/slugify'
-import { z } from 'zod'
+import { sanitizeNoteHtml } from '@/lib/utils/sanitize'
 
 export type Note = {
   id: string
@@ -22,36 +21,25 @@ export type Note = {
   updatedAt: Date
 }
 
-const NoteSchema = z.object({
-  title: z.string().min(1),
-  slug: z.string().min(1),
-  content: z.string(),
-  readTime: z.string().min(1),
-})
-
-export async function createNote(_prevState: { error?: string } | undefined, formData: FormData) {
-  await requireAdmin()
-
-  const title = formData.get('title') as string
-  if (!title?.trim()) return { error: 'Title is required.' }
-
-  const rawSlug = (formData.get('slug') as string) || slugify(title)
-  const slug = slugify(rawSlug)
-
-  const existing = await prisma.note.findUnique({ where: { slug } })
-  if (existing) return { error: 'A note with this slug already exists.' }
-
-  const note = await prisma.note.create({
-    data: {
-      title: title.trim(),
-      slug,
-      content: '',
-      readTime: '2 min read',
-    },
-  })
-
+function touch(slugs: string[]) {
   revalidatePath('/admin/notes')
-  redirect(`/admin/notes/${note.id}`)
+  revalidatePath('/gallery')
+  revalidatePath('/notes/[slug]', 'page')
+  for (const s of new Set(slugs)) revalidatePath(`/notes/${s}`)
+}
+
+export async function createNote(input: { title: string; slug?: string }): Promise<Result<{ id: string }>> {
+  return adminAction(async () => {
+    const title = input.title?.trim()
+    if (!title) throw new UserError('Give the note a title.')
+    const slug = slugify(input.slug?.trim() || title)
+    if (!slug) throw new UserError('Add a web address (letters, numbers and dashes).')
+    if (await prisma.note.findUnique({ where: { slug } })) throw new UserError(`Another note already uses “${slug}”. Pick a different web address.`)
+    // New notes start as drafts so nothing half-written appears in Open Rolls.
+    const note = await prisma.note.create({ data: { title, slug, content: '', readTime: '2 min read', published: false } })
+    revalidatePath('/admin/notes')
+    return { id: note.id }
+  })
 }
 
 export async function updateNote(id: string, data: {
@@ -61,57 +49,39 @@ export async function updateNote(id: string, data: {
   readTime?: string
   headerImageId?: string | null
   footerImageId?: string | null
-}) {
-  await requireAdmin()
-
-  if (data.slug) {
-    data.slug = slugify(data.slug)
-    const existing = await prisma.note.findFirst({
-      where: { slug: data.slug, NOT: { id } },
-    })
-    if (existing) return { error: 'Slug already in use.' }
-  }
-
-  await prisma.note.update({
-    where: { id },
-    data,
+}): Promise<Result> {
+  return adminAction(async () => {
+    const before = await prisma.note.findUnique({ where: { id }, select: { slug: true } })
+    if (!before) throw new UserError('This note no longer exists.')
+    if (data.title !== undefined && !data.title.trim()) throw new UserError('Give the note a title.')
+    if (data.slug !== undefined) {
+      data.slug = slugify(data.slug)
+      if (!data.slug) throw new UserError('Add a web address (letters, numbers and dashes).')
+      if (await prisma.note.findFirst({ where: { slug: data.slug, NOT: { id } } })) throw new UserError('Another note already uses that web address.')
+    }
+    if (data.content !== undefined) data.content = sanitizeNoteHtml(data.content)
+    await prisma.note.update({ where: { id }, data })
+    touch([before.slug, data.slug ?? before.slug])
+    refresh()
+    return undefined
   })
-
-  revalidatePath('/admin/notes')
-  revalidatePath(`/admin/notes/${id}`)
-  revalidatePath('/gallery')
 }
 
-export async function publishNote(id: string) {
-  await requireAdmin()
-  const note = await prisma.note.update({
-    where: { id },
-    data: { published: true },
+export async function setNotePublished(id: string, published: boolean): Promise<Result> {
+  return adminAction(async () => {
+    const note = await prisma.note.update({ where: { id }, data: { published } })
+    touch([note.slug])
+    refresh()
+    return undefined
   })
-  revalidatePath('/gallery')
-  revalidatePath(`/notes/${note.slug}`)
-  revalidatePath('/admin/notes')
 }
 
-export async function unpublishNote(id: string) {
-  await requireAdmin()
-  const note = await prisma.note.update({
-    where: { id },
-    data: { published: false },
+export async function deleteNote(id: string): Promise<Result> {
+  return adminAction(async () => {
+    const note = await prisma.note.findUnique({ where: { id } })
+    if (!note) return undefined
+    await prisma.note.delete({ where: { id } })
+    touch([note.slug])
+    return undefined
   })
-  revalidatePath('/gallery')
-  revalidatePath(`/notes/${note.slug}`)
-  revalidatePath('/admin/notes')
-}
-
-export async function deleteNote(id: string) {
-  await requireAdmin()
-  const note = await prisma.note.findUnique({ where: { id } })
-  if (!note) return
-
-  await prisma.note.delete({ where: { id } })
-  revalidatePath('/gallery')
-  revalidatePath(`/notes/${note.slug}`)
-  revalidatePath('/admin/notes')
-  redirect('/admin/notes')
 }

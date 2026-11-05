@@ -1,19 +1,17 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
-import MusicPlayer from '@/components/public/about/MusicPlayer'
 import { useMusicPlayer } from './MusicPlayerProvider'
 
+// Browser only: the player picks a random track and talks to the audio element.
+const MusicPlayer = dynamic(() => import('@/components/public/about/MusicPlayer'), { ssr: false })
+
+/** Mounted once in the root layout. Nothing else in the site renders a player. */
 export default function GlobalMusicPlayer() {
   const pathname = usePathname()
   const { hasStarted } = useMusicPlayer()
-
   if (pathname.startsWith('/admin') || pathname.startsWith('/auth')) return null
   if (!hasStarted) return null
-
-  return (
-    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 scale-75 md:scale-100 origin-bottom-right">
-      <MusicPlayer />
-    </div>
-  )
+  return <MusicPlayer />
 }

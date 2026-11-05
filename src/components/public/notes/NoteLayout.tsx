@@ -1,209 +1,92 @@
-"use client";
+'use client'
 
-import { useRef, useEffect, useCallback, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { photoSrcSet, photoUrl } from '@/lib/utils/cloudinary-url'
 
-type NoteImage = {
-  cloudinaryId: string;
-  width: number;
-  height: number;
-  altText: string | null;
-};
+type NoteImage = { cloudinaryId: string; width: number; height: number; altText: string | null }
+type Props = { title: string; readTime: string; html: string; headerImage?: NoteImage | null; footerImage?: NoteImage | null }
 
-type Props = {
-  title: string;
-  readTime: string;
-  content: string;
-  headerImage?: NoteImage | null;
-  footerImage?: NoteImage | null;
-  headerImageUrl: string;
-  headerBlurUrl: string;
-  footerImageUrl: string;
-  footerBlurUrl: string;
-};
+/**
+ * A note: title, text in one centred column, optional header and footer photo.
+ * The header photo stays pinned while you read and grows as you reach the end
+ * (same effect as before). Without a header photo the page is exactly as tall as its content.
+ */
+export default function NoteLayout({ title, readTime, html, headerImage, footerImage }: Props) {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef(0)
+  const [pin, setPin] = useState({ scale: 1, pinned: true, lockTop: 0 })
 
-export default function NoteLayout({
-  title,
-  readTime,
-  content,
-  headerImage,
-  footerImage,
-  headerImageUrl,
-  headerBlurUrl,
-  footerImageUrl,
-  footerBlurUrl,
-}: Props) {
-  const headerImgRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const footerImgRef = useRef<HTMLDivElement>(null);
-
-  const scaleRef = useRef(1);
-  const pinnedRef = useRef(true);
-  const lockTopRef = useRef(0);
-
-  const [, forceRender] = useState(0);
-  const rafRef = useRef(0);
-
-  const handleScroll = useCallback(() => {
-    cancelAnimationFrame(rafRef.current);
+  const onScroll = useCallback(() => {
+    cancelAnimationFrame(rafRef.current)
     rafRef.current = requestAnimationFrame(() => {
-      if (!headerImage) return;
-      const vh = window.innerHeight;
-      let changed = false;
-
+      const vh = window.innerHeight
+      let scale = 1
       if (contentRef.current) {
-        const fixedImgTop = vh * 0.15;
-        const imgHeight = 128;
-        const imgBottom = fixedImgTop + imgHeight;
-        const contentBottom = contentRef.current.getBoundingClientRect().bottom;
-
-        const earlyStart = 300;
-        if (contentBottom <= imgBottom + earlyStart) {
-          const scrollPastTrigger = (imgBottom + earlyStart) - contentBottom;
-          const scaleDistance = vh * 0.8;
-          const progress = Math.min(1, scrollPastTrigger / scaleDistance);
-          const vw = window.innerWidth;
-          const maxScale = Math.min(5, vw / 128);
-          const eased = progress * progress;
-          const newScale = 1 + eased * (maxScale - 1);
-          if (Math.abs(newScale - scaleRef.current) > 0.01) {
-            scaleRef.current = newScale;
-            changed = true;
-          }
-        } else if (scaleRef.current !== 1) {
-          scaleRef.current = 1;
-          changed = true;
+        const trigger = vh * 0.15 + 128 + 300
+        const bottom = contentRef.current.getBoundingClientRect().bottom
+        if (bottom <= trigger) {
+          const p = Math.min(1, (trigger - bottom) / (vh * 0.8))
+          scale = 1 + p * p * (Math.min(5, window.innerWidth / 128) - 1)
         }
       }
-
-      if (footerImgRef.current) {
-        const footerTop = footerImgRef.current.getBoundingClientRect().top;
-        const fixedHeaderTop = vh * 0.15;
-
-        if (footerTop <= fixedHeaderTop) {
-          if (pinnedRef.current) {
-            pinnedRef.current = false;
-            lockTopRef.current = window.scrollY + fixedHeaderTop;
-            changed = true;
-          }
-        } else {
-          if (!pinnedRef.current) {
-            pinnedRef.current = true;
-            changed = true;
-          }
-        }
-      }
-
-      if (changed) {
-        forceRender((n) => n + 1);
-      }
-    });
-  }, [headerImage]);
+      const pinned = footerRef.current ? footerRef.current.getBoundingClientRect().top > vh * 0.15 : true
+      setPin(prev => {
+        const lockTop = !pinned && prev.pinned ? window.scrollY + vh * 0.15 : prev.lockTop
+        if (Math.abs(prev.scale - scale) < 0.01 && prev.pinned === pinned && prev.lockTop === lockTop) return prev
+        return { scale, pinned, lockTop }
+      })
+    })
+  }, [])
 
   useEffect(() => {
-    if (!headerImage) return;
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [headerImage, handleScroll]);
-
-  const scale = scaleRef.current;
-  const pinned = pinnedRef.current;
-  const lockTop = lockTopRef.current;
+    if (!headerImage) return
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafRef.current) }
+  }, [headerImage, onScroll])
 
   return (
     <div className="relative">
       {headerImage && (
         <div
-          ref={headerImgRef}
           className="left-1/2 z-20 pointer-events-none"
           style={{
-            position: pinned ? "fixed" : "absolute",
-            top: pinned ? "15%" : `${lockTop}px`,
-            width: "8rem",
-            transform: `translateX(-50%) scale(${scale})`,
-            transformOrigin: "center top",
-            willChange: "transform",
+            position: pin.pinned ? 'fixed' : 'absolute',
+            top: pin.pinned ? '15%' : `${pin.lockTop}px`,
+            width: '8rem',
+            transform: `translateX(-50%) scale(${pin.scale})`,
+            transformOrigin: 'center top',
+            willChange: 'transform',
           }}
         >
-          <Image
-            src={headerImageUrl}
-            alt={headerImage.altText ?? title}
-            width={headerImage.width}
-            height={headerImage.height}
-            className="w-full h-auto"
-            placeholder="blur"
-            blurDataURL={headerBlurUrl}
-            priority
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photoUrl(headerImage.cloudinaryId, 800)} srcSet={photoSrcSet(headerImage.cloudinaryId)} sizes="640px" width={headerImage.width} height={headerImage.height} alt={headerImage.altText ?? ''} className="w-full h-auto" />
         </div>
       )}
 
-      <article
-        className="relative z-10 mx-auto px-6 pt-24 md:pt-36 pb-0"
-        style={{ maxWidth: 640 }}
-      >
-        {headerImage && (
-          <div className="flex justify-center mb-6 md:mb-4">
-            <div className="w-32 invisible" aria-hidden="true">
-              <Image
-                src={headerImageUrl}
-                alt=""
-                width={headerImage.width}
-                height={headerImage.height}
-                className="w-full h-auto"
-              />
-            </div>
-          </div>
-        )}
-
+      <article className="relative z-10 mx-auto px-6 pt-28 md:pt-36" style={{ maxWidth: 680 }}>
+        {headerImage && <div className="mx-auto mb-6 w-32" style={{ aspectRatio: `${headerImage.width} / ${headerImage.height}` }} aria-hidden="true" />}
         <header className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-3">
-            <span className="font-sans text-sm font-medium text-[var(--color-ink)]">
-              Notes
-            </span>
-            <span className="font-sans text-sm text-[#848484]">|</span>
-            <span className="font-sans text-sm uppercase text-[#848484]">
-              {readTime}
-            </span>
+          <div className="flex items-center justify-center gap-1.5 mb-3 font-sans text-sm">
+            <span className="font-medium">Notes</span>
+            <span className="text-[#767676]">|</span>
+            <span className="uppercase text-[#767676]">{readTime}</span>
           </div>
-          <h1
-            className="text-xl md:text-2xl font-medium leading-snug tracking-wide uppercase"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            {title}
-          </h1>
+          <h1 className="text-xl md:text-2xl font-medium leading-snug tracking-wide uppercase" style={{ fontFamily: 'var(--font-heading)' }}>{title}</h1>
         </header>
-
-        <div
-          ref={contentRef}
-          className="font-sans text-base leading-[1.8] text-[var(--color-ink)] text-center space-y-8"
-          style={{ fontWeight: 400 }}
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-
+        <div ref={contentRef} className="nt-body" dangerouslySetInnerHTML={{ __html: html }} />
       </article>
 
-      {headerImage && (
-        <div className="relative" style={{ height: "80vh" }} />
-      )}
+      {/* room for the header photo to grow into */}
+      {headerImage && <div aria-hidden="true" style={{ height: '80vh' }} />}
 
       {footerImage && (
-        <div ref={footerImgRef} className="relative z-20 mx-auto px-6 pb-16" style={{ maxWidth: 640 }}>
-          <Image
-            src={footerImageUrl}
-            alt={footerImage.altText ?? ""}
-            width={footerImage.width}
-            height={footerImage.height}
-            className="w-full h-auto"
-            placeholder="blur"
-            blurDataURL={footerBlurUrl}
-          />
+        <div ref={footerRef} className="relative z-20 mx-auto px-6 pt-8" style={{ maxWidth: 680 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photoUrl(footerImage.cloudinaryId, 1400)} srcSet={photoSrcSet(footerImage.cloudinaryId)} sizes="680px" width={footerImage.width} height={footerImage.height} alt={footerImage.altText ?? ''} className="w-full h-auto" loading="lazy" />
         </div>
       )}
     </div>
-  );
+  )
 }
