@@ -33,10 +33,10 @@ export async function addGalleryImages(assetIds: string[]) {
     for (const id of assetIds) {
       const a = byId.get(id)
       if (!a) continue
-      created.push(await prisma.galleryImage.create({
+      const row = await prisma.galleryImage.create({
         data: { imageId: id, order: order++, mediaType: VIDEO_FORMATS.includes(a.format) ? 'VIDEO' : 'PHOTO' },
-        include: { image: true },
-      }))
+      })
+      created.push({ ...row, image: a })
     }
     touch()
     return created

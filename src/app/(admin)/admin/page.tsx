@@ -7,7 +7,7 @@ export default async function DashboardPage() {
   const [stories, published, rolls, notes, recent] = await Promise.all([
     prisma.project.count(),
     prisma.project.count({ where: { published: true } }),
-    prisma.galleryImage.count({ where: { published: true } }),
+    prisma.galleryImage.count({ where: { published: true, imageId: { not: null } } }),
     prisma.note.count({ where: { published: true } }),
     prisma.project.findMany({ orderBy: { updatedAt: 'desc' }, take: 6, select: { id: true, title: true, published: true, updatedAt: true } }),
   ])

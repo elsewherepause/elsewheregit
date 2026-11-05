@@ -11,11 +11,12 @@ export const metadata: Metadata = { title: 'Open Rolls', alternates: { canonical
 
 export default async function GalleryPage() {
   const [images, notes, destinations] = await Promise.all([
-    prisma.galleryImage.findMany({ where: { published: true }, include: { image: true }, orderBy: [{ order: 'asc' }, { createdAt: 'desc' }] }).catch(e => { console.error('[gallery]', e); return [] }),
+    prisma.galleryImage.findMany({ where: { published: true, imageId: { not: null } }, include: { image: true }, orderBy: [{ order: 'asc' }, { createdAt: 'desc' }] }).catch(e => { console.error('[gallery]', e); return [] }),
     prisma.note.findMany({ where: { published: true }, orderBy: { createdAt: 'desc' }, select: { slug: true, title: true, readTime: true } }).catch(() => []),
     getAllDestinations(),
   ])
-  const items: RollItem[] = images.map(i => ({
+  // Skip entries with no photo attached (some older rows have none).
+  const items: RollItem[] = images.flatMap(i => (i.image ? [{ ...i, image: i.image }] : [])).map(i => ({
     key: i.id,
     id: i.image.cloudinaryId,
     w: i.image.width || 1500,

@@ -108,7 +108,7 @@ if ($LASTEXITCODE -eq 0) {
 } else {
   git diff --cached --stat | Select-Object -Last 1
   $msg = 'Rebuild: one auto-layout story template, Open Rolls tabs, reliable publishing and uploads'
-  if ($rebuildExists) { $msg = 'Update rebuild: apply the database update automatically during Vercel builds' }
+  if ($rebuildExists) { $msg = 'Update rebuild: latest fixes' }
   Git-Run 'Commit' commit -q -m $msg
   Step 5 "Uploading to the '$branch' branch"
   Git-Run 'Uploading' push -u origin $branch

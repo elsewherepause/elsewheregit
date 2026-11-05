@@ -132,9 +132,11 @@ enum GalleryMediaType {
 }
 
 model GalleryImage {
-  id      String     @id @default(cuid())
-  imageId String
-  image   MediaAsset @relation("GalleryImageAsset", fields: [imageId], references: [id], onDelete: Cascade)
+  id      String      @id @default(cuid())
+  // Optional because some older rows in the live database have no photo attached.
+  // Those rows are skipped everywhere (see the gallery pages and actions).
+  imageId String?
+  image   MediaAsset? @relation("GalleryImageAsset", fields: [imageId], references: [id], onDelete: Cascade)
 
   altText     String?
   caption     String?
