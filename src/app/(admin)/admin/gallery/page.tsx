@@ -1,24 +1,17 @@
-import { getGalleryImages } from '@/actions/gallery.actions'
+import { prisma } from '@/lib/prisma'
 import GalleryAdminClient from '@/components/admin/gallery/GalleryAdminClient'
 
-export const metadata = { title: 'Gallery' }
+export const metadata = { title: 'Open Rolls' }
 
 export default async function AdminGalleryPage() {
-  const items = await getGalleryImages()
-
+  const rows = await prisma.galleryImage.findMany({ where: { imageId: { not: null } }, include: { image: true }, orderBy: [{ order: 'asc' }, { createdAt: 'desc' }] })
+  // Entries with no photo attached (from older data) are left out.
+  const items = rows.flatMap(r => (r.image ? [{ ...r, image: r.image }] : []))
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-8 py-5 border-b border-[var(--color-border)] bg-white">
-        <h1 className="text-xl font-medium" style={{ fontFamily: 'var(--font-heading)' }}>
-          Gallery
-        </h1>
-        <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
-          Manage standalone gallery images shown on the public Gallery page. Drag to reorder.
-        </p>
-      </div>
-      <div className="flex-1 overflow-y-auto p-8">
-        <GalleryAdminClient initialItems={items} />
-      </div>
+    <div className="p-8 max-w-3xl">
+      <h1 className="text-2xl font-medium" style={{ fontFamily: 'var(--font-heading)' }}>Open Rolls</h1>
+      <p className="text-xs text-[#767676] mt-1 mb-6">Photos and videos on the Open Rolls page. New ones go to the top and show first; drag to change the order.</p>
+      <GalleryAdminClient initialItems={items} />
     </div>
   )
 }

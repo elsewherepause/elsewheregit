@@ -1,89 +1,51 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { createProject } from '@/actions/project.actions'
+import { slugify } from '@/lib/utils/slugify'
 
 export default function NewProjectPage() {
-  const [state, action, pending] = useActionState(createProject, undefined)
+  const router = useRouter()
+  const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
+  const [touched, setTouched] = useState(false)
+  const [category, setCategory] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [pending, start] = useTransition()
+  const shown = touched ? slug : slugify(title)
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault()
+    start(async () => {
+      setError(null)
+      const r = await createProject({ title, slug: shown, category: category || null })
+      if (!r.ok) { setError(r.error); return }
+      router.push(`/admin/projects/${r.data.id}`)
+    })
+  }
 
   return (
     <div className="p-8 max-w-lg">
-      <h1 className="text-2xl font-medium mb-8" style={{ fontFamily: 'var(--font-heading)' }}>
-        New Project
-      </h1>
-
-      <form action={action} className="space-y-5">
-        {state?.error && (
-          <p className="text-sm text-[var(--color-accent)]">{state.error}</p>
-        )}
-
-        <div className="space-y-1">
-          <label htmlFor="title" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Title *
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            required
-            autoFocus
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--color-ink)] transition-colors"
-          />
+      <h1 className="text-2xl font-medium mb-8" style={{ fontFamily: 'var(--font-heading)' }}>New story</h1>
+      <form onSubmit={submit} className="space-y-5">
+        {error && <p role="alert" className="text-sm text-[#a33a1a] bg-[#fdf1ed] border border-[#f0c9bd] px-3 py-2">{error}</p>}
+        <div>
+          <label htmlFor="title" className="block text-xs font-semibold text-[#505050] mb-1">Title</label>
+          <input id="title" required autoFocus value={title} onChange={e => setTitle(e.target.value)} className="field-input !text-sm !py-2.5" />
         </div>
-
-        <div className="space-y-1">
-          <label htmlFor="slug" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Slug <span className="normal-case text-[var(--color-ink-faint)]">(auto-generated if blank)</span>
-          </label>
-          <input
-            id="slug"
-            name="slug"
-            type="text"
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-[var(--color-ink)] transition-colors"
-            placeholder="my-project-slug"
-          />
+        <div>
+          <label htmlFor="slug" className="block text-xs font-semibold text-[#505050] mb-1">Web address</label>
+          <input id="slug" value={shown} onChange={e => { setTouched(true); setSlug(e.target.value) }} onBlur={() => touched && setSlug(slugify(slug))} className="field-input !text-sm !py-2.5 font-mono" placeholder="filled in from the title" />
+          <span className="block text-xs text-[#767676] mt-1">elsewhere.ink/{shown || '…'}</span>
         </div>
-
-        <div className="space-y-1">
-          <label htmlFor="template" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Template
-          </label>
-          <select
-            id="template"
-            name="template"
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--color-ink)] transition-colors bg-transparent appearance-none rounded-none"
-            defaultValue="TEMPLATE_1"
-          >
-            <option value="TEMPLATE_1">Template 1</option>
-            <option value="TEMPLATE_2">Template 2</option>
-            <option value="TEMPLATE_3">Template 3</option>
-            <option value="TEMPLATE_4">Template 4</option>
+        <div>
+          <label htmlFor="category" className="block text-xs font-semibold text-[#505050] mb-1">Category</label>
+          <select id="category" value={category} onChange={e => setCategory(e.target.value)} className="field-input !text-sm !py-2.5">
+            <option value="">None</option><option value="CULTURE">Culture</option><option value="ADVENTURE">Adventure</option>
           </select>
         </div>
-
-        <div className="space-y-1">
-          <label htmlFor="category" className="block text-xs uppercase tracking-widest text-[var(--color-ink-muted)]">
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--color-ink)] transition-colors bg-transparent appearance-none rounded-none"
-            defaultValue=""
-          >
-            <option value="">None</option>
-            <option value="CULTURE">Culture</option>
-            <option value="ADVENTURE">Adventure</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="px-6 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-40"
-        >
-          {pending ? 'Creating…' : 'Create Project'}
-        </button>
+        <button type="submit" disabled={pending || !title.trim()} className="px-6 py-2.5 bg-black text-white text-xs font-semibold disabled:opacity-40">{pending ? 'Creating…' : 'Create story'}</button>
       </form>
     </div>
   )

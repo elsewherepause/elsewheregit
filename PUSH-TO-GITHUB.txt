@@ -1,0 +1,46 @@
+# =====================================================================
+#  .elsewhere - push ALL the new changes to GitHub (preview first)
+#
+#  HOW TO USE: open PowerShell, copy EVERYTHING in this file,
+#  paste it into PowerShell and press Enter.
+#  (Lines starting with # are notes - PowerShell ignores them.)
+# =====================================================================
+
+cd "D:\elsewhere-main_latest\elsewhere-main"; powershell -ExecutionPolicy Bypass -File .\finish.ps1
+
+# ---------------------------------------------------------------------
+#  WHAT THIS PUSHES (to the "rebuild" preview branch on GitHub):
+#   - Note pages: text first, then the rotating photo frame
+#     (thin arrows only, no autoplay, faint side photos)
+#   - Note editor: one "Photos" list (add many, reorder, caption)
+#   - Menu: more space between stories, scrolls if the list is long
+#   - Scrollbar: slim minimal grey bar, no track or arrows
+#   - Story chapter list: centred on screen with more spacing
+#   - Correct photo sizes for older stories (portrait/landscape fix)
+#   - Open Rolls: entries without a photo are skipped, not crashing
+#   - Database update (add-only) runs by itself on Vercel
+#
+#  IF IT ASKS:  "...Delete it? (y/n)"   type  y  and press Enter
+#  IF A GITHUB SIGN-IN WINDOW OPENS:    sign in, it then continues
+#
+#  YOU SHOULD SEE AT THE END:
+#     OK  GitHub 'rebuild' matches this folder exactly ...
+#     OK  Live branch 'main' was not touched
+#     ALL GOOD.
+#
+#  THEN:
+#   1. Vercel > Deployments > wait for the newest "rebuild" build = Ready
+#      (Build Logs should say: "Database is up to date")
+#   2. Click Visit and check: a note (photo frame at the bottom),
+#      the menu, a story, Open Rolls
+#   3. Go live:
+#      https://github.com/elsewherepause/elsewheregit/compare/main...rebuild
+#      click "Create pull request", then "Merge pull request"
+#
+#  IF YOU SEE A RED "STOPPED" OR "PROBLEM" LINE:
+#      copy everything PowerShell printed and send it to Claude.
+#
+#  UNDO AFTER GOING LIVE:
+#      Vercel > Deployments > previous production deployment
+#      > ... > Instant Rollback
+# =====================================================================

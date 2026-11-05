@@ -3,47 +3,41 @@
 import { resend } from '@/lib/resend'
 
 const CONTACT_TO = process.env.CONTACT_EMAIL ?? 'arjun@elsewhere.ink'
-const CONTACT_FROM = process.env.CONTACT_FROM ?? 'contact@elsewhere.ink'
+const CONTACT_FROM = process.env.CONTACT_FROM ?? 'onboarding@resend.dev'
 
 type ContactState = { ok: boolean; message: string } | null
 
-export async function sendContactForm(
-  _prev: ContactState,
-  formData: FormData,
-): Promise<ContactState> {
-  const name = (formData.get('name') as string)?.trim()
-  const email = (formData.get('email') as string)?.trim()
-  const organisation = (formData.get('organisation') as string)?.trim()
-  const message = (formData.get('message') as string)?.trim()
+export async function sendContactForm(_prev: ContactState, formData: FormData): Promise<ContactState> {
+  const name = String(formData.get('name') ?? '').trim()
+  const email = String(formData.get('email') ?? '').trim()
+  const organisation = String(formData.get('organisation') ?? '').trim()
+  const message = String(formData.get('message') ?? '').trim()
 
-  if (!name || !email || !message) {
-    return { ok: false, message: 'Please fill in your name, email, and message.' }
+  if (!name || !email || !message) return { ok: false, message: 'Please fill in your name, email and message.' }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, message: 'Please enter a valid email address.' }
+  if (message.length > 5000) return { ok: false, message: 'Please keep the message under 5,000 characters.' }
+
+  const fallback = `Something went wrong sending this. Please email ${CONTACT_TO} directly.`
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[contact] RESEND_API_KEY is not set')
+    return { ok: false, message: fallback }
   }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    return { ok: false, message: 'Please enter a valid email address.' }
-  }
-
   try {
-    await resend.emails.send({
+    // Resend reports failures in the return value rather than by throwing.
+    const { error } = await resend.emails.send({
       from: `Elsewhere Contact <${CONTACT_FROM}>`,
       to: CONTACT_TO,
       replyTo: email,
       subject: `New message from ${name}`,
-      text: [
-        `Name: ${name}`,
-        `Email: ${email}`,
-        organisation ? `Organisation: ${organisation}` : '',
-        '',
-        message,
-      ]
-        .filter(Boolean)
-        .join('\n'),
+      text: [`Name: ${name}`, `Email: ${email}`, organisation ? `Organisation: ${organisation}` : '', '', message].filter(Boolean).join('\n'),
     })
-
-    return { ok: true, message: "Message sent. We’ll be in touch." }
-  } catch {
-    return { ok: false, message: 'Something went wrong. Please try emailing directly.' }
+    if (error) {
+      console.error('[contact] Resend error', error)
+      return { ok: false, message: fallback }
+    }
+    return { ok: true, message: 'Message sent. We’ll be in touch.' }
+  } catch (err) {
+    console.error('[contact]', err)
+    return { ok: false, message: fallback }
   }
 }

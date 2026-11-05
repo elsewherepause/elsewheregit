@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "gallery", "other templates"]
+  "exclude": ["node_modules", "gallery", "other templates", "legacy-removed"]
 }

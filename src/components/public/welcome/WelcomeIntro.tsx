@@ -68,7 +68,7 @@ export default function WelcomeIntro() {
             >
               <span style={{ fontWeight: 700, color: '#1c1c1c' }}>
                 Elsewhere shapes narratives at the edges{' '}
-                of culture and craft, across documentary and strategy. The work begins with people and place, and moves toward form, for brands and institutions that need more than content.
+                of culture, craft, landscape, and meaning, working across documentary, strategy, and brand storytelling. The work begins with people and place, then moves toward form and language, for brands, institutions, and cultural ventures that need more than content.
               </span>
             </p>
 
@@ -85,7 +85,7 @@ export default function WelcomeIntro() {
                 transition: 'color 0.2s',
               }}
             >
-              Continue
+              Take me elsewhere
             </span>
           </motion.div>
         )}

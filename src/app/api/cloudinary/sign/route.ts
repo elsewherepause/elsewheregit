@@ -2,26 +2,21 @@ import { auth } from '@/lib/auth'
 import { cloudinary } from '@/lib/cloudinary'
 import { NextRequest, NextResponse } from 'next/server'
 
+const FOLDERS = new Set(['elsewhere/photos', 'elsewhere/videos'])
+
 export async function POST(req: NextRequest) {
   const session = await auth()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { folder = 'elsewhere', format } = await req.json().catch(() => ({}))
-
+  if (!session) return NextResponse.json({ error: 'signed-out' }, { status: 401 })
+  if (!process.env.CLOUDINARY_API_SECRET || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_CLOUD_NAME) {
+    console.error('[cloudinary sign] Cloudinary env vars are missing')
+    return NextResponse.json({ error: 'config' }, { status: 500 })
+  }
+  const body = await req.json().catch(() => ({}))
+  const folder = FOLDERS.has(body?.folder) ? body.folder : 'elsewhere/photos'
   const timestamp = Math.round(Date.now() / 1000)
-  const paramsToSign: Record<string, string | number> = { folder, timestamp }
-  if (format) paramsToSign.format = format
-
-  const signature = cloudinary.utils.api_sign_request(
-    paramsToSign,
-    process.env.CLOUDINARY_API_SECRET!
-  )
-
+  const signature = cloudinary.utils.api_sign_request({ folder, timestamp }, process.env.CLOUDINARY_API_SECRET)
   return NextResponse.json({
-    signature,
-    timestamp,
-    folder,
-    format,
+    signature, timestamp, folder,
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
   })

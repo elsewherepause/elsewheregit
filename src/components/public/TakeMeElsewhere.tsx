@@ -1,41 +1,22 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 
-type Props = {
-  destinations: { slug: string }[]
-  className?: string
-  style?: React.CSSProperties
-}
+type Props = { destinations: { slug: string }[]; className?: string }
 
-export default function TakeMeElsewhere({ destinations, className, style }: Props) {
+/** Sends the visitor to a random story, note or Open Rolls — anywhere but here. */
+export default function TakeMeElsewhere({ destinations, className }: Props) {
   const router = useRouter()
   const pathname = usePathname()
-  const [hovered, setHovered] = useState(false)
-
-  function go() {
-    const others = destinations.filter(d => `/${d.slug}` !== pathname)
-    if (others.length === 0) return
-    const pick = others[Math.floor(Math.random() * others.length)]
-    router.push(`/${pick.slug}`)
-  }
-
+  const others = destinations.filter(d => `/${d.slug}` !== pathname)
+  if (others.length === 0) return null
   return (
-    <span
-      onClick={go}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={className}
-      style={{
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        transition: 'color 0.2s',
-        ...style,
-        ...(hovered ? { color: '#000' } : null),
-      }}
+    <button
+      type="button"
+      onClick={() => router.push(`/${others[Math.floor(Math.random() * others.length)].slug}`)}
+      className={`ew-muted-link ${className ?? ''}`}
     >
       Take me elsewhere
-    </span>
+    </button>
   )
 }

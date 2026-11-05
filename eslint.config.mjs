@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Old template system kept for reference only — not part of the app.
+    "legacy-removed/**",
   ]),
 ]);
 
